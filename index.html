@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penghitung Point Remi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        .player-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .player-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+        }
+        .point-btn {
+            transition: all 0.2s ease;
+        }
+        .point-btn:hover {
+            transform: scale(1.05);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-8 mb-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold text-center mb-2">🃏 Penghitung Point Remi</h1>
+            <p class="text-center text-blue-100">Kelola skor permainan remi dengan mudah</p>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 max-w-6xl">
+        <!-- Add Player Section -->
+        <div class="card-shadow bg-white rounded-2xl p-6 mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">👥</span> Tambah Pemain
+            </h2>
+            <div class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="playerName" 
+                    placeholder="Masukkan nama pemain..."
+                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                    onkeypress="if(event.key==='Enter') addPlayer()"
+                >
+                <button 
+                    onclick="addPlayer()" 
+                    class="btn-primary text-white px-8 py-3 rounded-xl font-medium hover:shadow-lg"
+                >
+                    Tambah
+                </button>
+            </div>
+        </div>
+
+        <!-- Players Grid -->
+        <div id="playersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Players will be dynamically added here -->
+        </div>
+
+        <!-- Reset Game Button -->
+        <div class="text-center mt-8 mb-8">
+            <button 
+                onclick="resetGame()" 
+                class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-medium transition-colors hover:shadow-lg"
+            >
+                🔄 Reset Permainan
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+
+        // Load data from localStorage on page load
+        window.onload = function() {
+            const savedPlayers = localStorage.getItem('remiPlayers');
+            if (savedPlayers) {
+                players = JSON.parse(savedPlayers);
+                renderPlayers();
+            }
+        };
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('remiPlayers', JSON.stringify(players));
+        }
+
+        // Add new player
+        function addPlayer() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+            
+            if (name === '') {
+                alert('Mohon masukkan nama pemain!');
+                return;
+            }
+
+            // Check if player already exists
+            if (players.some(player => player.name.toLowerCase() === name.toLowerCase())) {
+                alert('Pemain dengan nama tersebut sudah ada!');
+                return;
+            }
+
+            const newPlayer = {
+                id: Date.now(),
+                name: name,
+                points: 0
+            };
+
+            players.push(newPlayer);
+            nameInput.value = '';
+            saveData();
+            renderPlayers();
+        }
+
+        // Remove player
+        function removePlayer(id) {
+            if (confirm('Yakin ingin menghapus pemain ini?')) {
+                players = players.filter(player => player.id !== id);
+                saveData();
+                renderPlayers();
+            }
+        }
+
+        // Edit player name
+        function editPlayerName(id) {
+            const player = players.find(p => p.id === id);
+            const newName = prompt('Masukkan nama baru:', player.name);
+            
+            if (newName && newName.trim() !== '') {
+                // Check if new name already exists
+                if (players.some(p => p.id !== id && p.name.toLowerCase() === newName.trim().toLowerCase())) {
+                    alert('Nama tersebut sudah digunakan pemain lain!');
+                    return;
+                }
+                
+                player.name = newName.trim();
+                saveData();
+                renderPlayers();
+            }
+        }
+
+        // Add points
+        function addPoints(id, amount) {
+            const player = players.find(p => p.id === id);
+            player.points += amount;
+            saveData();
+            renderPlayers();
+        }
+
+        // Subtract points
+        function subtractPoints(id, amount) {
+            const player = players.find(p => p.id === id);
+            player.points -= amount;
+            saveData();
+            renderPlayers();
+        }
+
+        // Add manual points
+        function addManualPoints(id) {
+            const input = document.getElementById(`addPoints${id}`);
+            const points = parseInt(input.value);
+            
+            if (isNaN(points) || points <= 0) {
+                alert('Mohon masukkan angka positif yang valid!');
+                return;
+            }
+            
+            const player = players.find(p => p.id === id);
+            player.points += points;
+            input.value = '';
+            saveData();
+            renderPlayers();
+        }
+
+        // Subtract manual points
+        function subtractManualPoints(id) {
+            const input = document.getElementById(`subtractPoints${id}`);
+            const points = parseInt(input.value);
+            
+            if (isNaN(points) || points <= 0) {
+                alert('Mohon masukkan angka positif yang valid!');
+                return;
+            }
+            
+            const player = players.find(p => p.id === id);
+            player.points -= points;
+            input.value = '';
+            saveData();
+            renderPlayers();
+        }
+
+        // Reset game
+        function resetGame() {
+            if (confirm('Yakin ingin mereset semua data permainan?')) {
+                players = [];
+                localStorage.removeItem('remiPlayers');
+                renderPlayers();
+            }
+        }
+
+        // Render all players
+        function renderPlayers() {
+            const container = document.getElementById('playersContainer');
+            
+            if (players.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-6xl mb-4">🎮</div>
+                        <h3 class="text-xl font-medium text-gray-600 mb-2">Belum ada pemain</h3>
+                        <p class="text-gray-500">Tambahkan pemain untuk memulai permainan</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort players by points (highest first)
+            const sortedPlayers = [...players].sort((a, b) => b.points - a.points);
+
+            container.innerHTML = sortedPlayers.map((player, index) => `
+                <div class="player-card card-shadow bg-white rounded-2xl p-6 fade-in">
+                    <!-- Player Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                ${index === 0 ? '<span class="text-2xl">👑</span>' : '<span class="text-2xl">🎯</span>'}
+                                <h3 class="text-xl font-semibold text-gray-800 truncate">${player.name}</h3>
+                            </div>
+                            ${index === 0 ? '<span class="text-sm text-yellow-600 font-medium">Pemimpin</span>' : ''}
+                        </div>
+                        <div class="flex gap-2">
+                            <button 
+                                onclick="editPlayerName(${player.id})" 
+                                class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                title="Edit nama"
+                            >
+                                ✏️
+                            </button>
+                            <button 
+                                onclick="removePlayer(${player.id})" 
+                                class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                title="Hapus pemain"
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Points Display -->
+                    <div class="text-center mb-6">
+                        <div class="text-4xl font-bold ${player.points >= 0 ? 'text-green-600' : 'text-red-600'} mb-2">
+                            ${player.points >= 0 ? '+' : ''}${player.points}
+                        </div>
+                        <div class="text-sm text-gray-500">Point</div>
+                    </div>
+
+                    <!-- Point Controls -->
+                    <div class="space-y-3">
+                        <!-- Manual Add Points -->
+                        <div class="flex gap-2">
+                            <input 
+                                type="number" 
+                                id="addPoints${player.id}" 
+                                placeholder="Tambah point"
+                                class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-center"
+                                onkeypress="if(event.key==='Enter') addManualPoints(${player.id})"
+                            >
+                            <button onclick="addManualPoints(${player.id})" class="point-btn bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg font-medium">
+                                ➕
+                            </button>
+                        </div>
+                        
+                        <!-- Manual Subtract Points -->
+                        <div class="flex gap-2">
+                            <input 
+                                type="number" 
+                                id="subtractPoints${player.id}" 
+                                placeholder="Kurang point"
+                                class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none text-center"
+                                onkeypress="if(event.key==='Enter') subtractManualPoints(${player.id})"
+                            >
+                            <button onclick="subtractManualPoints(${player.id})" class="point-btn bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium">
+                                ➖
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96bf48931684409a',t:'MTc1NDY1ODkzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
