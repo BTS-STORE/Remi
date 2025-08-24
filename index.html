@@ -3,311 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penghitung Point Remi</title>
+    <title>Penghitung Poin Remi 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .btn-primary { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-        .player-card {
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        .player-card:hover {
-            border-color: #667eea;
-            transform: translateY(-4px);
-        }
-        .point-btn {
-            transition: all 0.2s ease;
-        }
-        .point-btn:hover {
-            transform: scale(1.05);
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen">
     <!-- Header -->
-    <div class="gradient-bg text-white py-8 mb-8">
-        <div class="container mx-auto px-4">
-            <h1 class="text-4xl font-bold text-center mb-2">🃏 Penghitung Point Remi</h1>
-            <p class="text-center text-blue-100">By Irsan.R</p>
+    <div class="bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div class="max-w-6xl mx-auto px-3 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-xl sm:text-3xl font-bold text-white flex items-center gap-2">
+                        🃏 Penghitung Poin Remi 2.0
+                    </h1>
+                    <p class="text-white/60 text-xs sm:text-sm mt-1">BY <span class="text-white font-medium">Irsan R</span></p>
+                </div>
+                <div class="flex gap-2 flex-wrap w-full sm:w-auto">
+                    <button onclick="showAddPlayerModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 sm:flex-none">
+                        + Tambah
+                    </button>
+                    <button onclick="exportData()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 sm:flex-none">
+                        📤 Ekspor
+                    </button>
+                    <button onclick="showImportModal()" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 sm:flex-none">
+                        📥 Impor
+                    </button>
+                    <button onclick="showResetModal()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 sm:flex-none">
+                        🔄 Reset
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="container mx-auto px-4 max-w-6xl">
-        <!-- Add Player Section -->
-        <div class="card-shadow bg-white rounded-2xl p-6 mb-8">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-                <span class="mr-2">👥</span> Tambah Pemain
-            </h2>
-            <div class="flex gap-3">
-                <input 
-                    type="text" 
-                    id="playerName" 
-                    placeholder="Masukkan nama pemain..."
-                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
-                    onkeypress="if(event.key==='Enter') addPlayer()"
-                >
-                <button 
-                    onclick="addPlayer()" 
-                    class="btn-primary text-white px-8 py-3 rounded-xl font-medium hover:shadow-lg"
-                >
+    <div class="max-w-6xl mx-auto px-3 py-4">
+        <div class="grid lg:grid-cols-3 gap-4">
+            <!-- Daftar Pemain -->
+            <div class="lg:col-span-2">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-4 shadow-2xl">
+                    <h2 class="text-lg sm:text-2xl font-semibold text-white mb-4 flex items-center gap-2">
+                        👥 Daftar Pemain
+                    </h2>
+                    <div id="playersList" class="space-y-4">
+                        <!-- Pemain akan ditambahkan di sini -->
+                    </div>
+                    <div id="emptyState" class="text-center py-12 text-white/60">
+                        <div class="text-6xl mb-4">🎮</div>
+                        <p class="text-lg">Belum ada pemain. Tambahkan pemain untuk memulai!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Riwayat Poin -->
+            <div class="lg:col-span-1">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-4 shadow-2xl">
+                    <h2 class="text-lg sm:text-2xl font-semibold text-white mb-4 flex items-center gap-2">
+                        📊 Riwayat Poin
+                    </h2>
+                    <div id="historyList" class="space-y-3 max-h-64 sm:max-h-96 overflow-y-auto">
+                        <div class="text-center py-8 text-white/60">
+                            <div class="text-4xl mb-2">📝</div>
+                            <p>Belum ada riwayat</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Pemain -->
+    <div id="addPlayerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-3 shadow-2xl slide-up">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Tambah Pemain Baru</h3>
+            <input type="text" id="playerNameInput" placeholder="Nama pemain..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-lg">
+            <div class="flex gap-3 mt-6">
+                <button onclick="addPlayer()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-medium transition-colors">
                     Tambah
+                </button>
+                <button onclick="hideAddPlayerModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-lg font-medium transition-colors">
+                    Batal
                 </button>
             </div>
         </div>
+    </div>
 
-        <!-- Players Grid -->
-        <div id="playersContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Players will be dynamically added here -->
-        </div>
-
-        <!-- Reset Game Button -->
-        <div class="text-center mt-8 mb-8">
-            <button 
-                onclick="resetGame()" 
-                class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-medium transition-colors hover:shadow-lg"
-            >
-                🔄 Reset Permainan
-            </button>
+    <!-- Modal Reset -->
+    <div id="resetModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-3 shadow-2xl slide-up">
+            <div class="text-center">
+                <div class="text-6xl mb-4">⚠️</div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Reset Permainan?</h3>
+                <p class="text-gray-600 mb-6">Semua poin pemain akan direset ke 0 dan riwayat akan dihapus. Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-3">
+                    <button onclick="resetGame()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-medium transition-colors">
+                        Ya, Reset
+                    </button>
+                    <button onclick="hideResetModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-lg font-medium transition-colors">
+                        Batal
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Modal Edit Pemain -->
+    <div id="editPlayerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-3 shadow-2xl slide-up">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Edit Nama Pemain</h3>
+            <input type="text" id="editPlayerNameInput" placeholder="Nama pemain..." class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-lg">
+            <div class="flex gap-3 mt-6">
+                <button onclick="savePlayerEdit()" class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-lg font-medium transition-colors">
+                    Simpan
+                </button>
+                <button onclick="hideEditPlayerModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-lg font-medium transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal Impor Data -->
+    <div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-3 shadow-2xl slide-up">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Impor Data</h3>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-2">Pilih file data (.json):</label>
+                <input type="file" id="importFileInput" accept=".json" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+            </div>
+            <div class="flex gap-3">
+                <button onclick="importData()" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-lg font-medium transition-colors">
+                    Impor
+                </button>
+                <button onclick="hideImportModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-lg font-medium transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Riwayat Pemain -->
+    <div id="playerHistoryModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-3 shadow-2xl slide-up max-h-[80vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="playerHistoryTitle" class="text-2xl font-bold text-gray-800">Riwayat Pemain</h3>
+                <button onclick="hidePlayerHistoryModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            </div>
+            <div id="playerHistoryContent" class="flex-1 overflow-y-auto space-y-3">
+                <!-- Riwayat pemain akan ditampilkan di sini -->
+            </div>
+        </div>
+    </div>
+
+
+
     <script>
         let players = [];
+        let history = [];
+        let editingPlayerId = null;
 
-        // Load data from localStorage on page load
-        window.onload = function() {
-            const savedPlayers = localStorage.getItem('remiPlayers');
-            if (savedPlayers) {
-                players = JSON.parse(savedPlayers);
-                renderPlayers();
-            }
-        };
-
-        // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('remiPlayers', JSON.stringify(players));
+        // Fungsi untuk menyimpan data ke localStorage
+        function saveToLocalStorage() {
+            const data = {
+                players: players,
+                history: history,
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem('remiGameData', JSON.stringify(data));
         }
 
-        // Add new player
+        // Fungsi untuk memuat data dari localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('remiGameData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    players = data.players || [];
+                    history = data.history || [];
+                    renderPlayers();
+                    renderHistory();
+                } catch (e) {
+                    console.error('Error loading data from localStorage:', e);
+                }
+            }
+        }
+
+        // Fungsi untuk menampilkan/menyembunyikan modal
+        function showAddPlayerModal() {
+            document.getElementById('addPlayerModal').classList.remove('hidden');
+            document.getElementById('addPlayerModal').classList.add('flex');
+            document.getElementById('playerNameInput').focus();
+        }
+
+        function hideAddPlayerModal() {
+            document.getElementById('addPlayerModal').classList.add('hidden');
+            document.getElementById('addPlayerModal').classList.remove('flex');
+            document.getElementById('playerNameInput').value = '';
+        }
+
+        function showResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+            document.getElementById('resetModal').classList.add('flex');
+        }
+
+        function hideResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+            document.getElementById('resetModal').classList.remove('flex');
+        }
+
+        function showEditPlayerModal(playerId) {
+            editingPlayerId = playerId;
+            const player = players.find(p => p.id === playerId);
+            document.getElementById('editPlayerNameInput').value = player.name;
+            document.getElementById('editPlayerModal').classList.remove('hidden');
+            document.getElementById('editPlayerModal').classList.add('flex');
+            document.getElementById('editPlayerNameInput').focus();
+        }
+
+        function hideEditPlayerModal() {
+            document.getElementById('editPlayerModal').classList.add('hidden');
+            document.getElementById('editPlayerModal').classList.remove('flex');
+            editingPlayerId = null;
+        }
+
+
+
+        function showImportModal() {
+            document.getElementById('importModal').classList.remove('hidden');
+            document.getElementById('importModal').classList.add('flex');
+        }
+
+        function hideImportModal() {
+            document.getElementById('importModal').classList.add('hidden');
+            document.getElementById('importModal').classList.remove('flex');
+            document.getElementById('importFileInput').value = '';
+        }
+
+        function showPlayerHistory(playerId) {
+            const player = players.find(p => p.id === playerId);
+            const playerHistory = history.filter(h => h.text.includes(player.name));
+            
+            document.getElementById('playerHistoryTitle').textContent = `Riwayat - ${player.name}`;
+            
+            const content = document.getElementById('playerHistoryContent');
+            if (playerHistory.length === 0) {
+                content.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">📝</div>
+                        <p>Belum ada riwayat untuk ${player.name}</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = playerHistory.map(item => `
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="text-gray-800 text-sm">${item.text}</div>
+                        <div class="text-gray-500 text-xs mt-2">${item.time}</div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('playerHistoryModal').classList.remove('hidden');
+            document.getElementById('playerHistoryModal').classList.add('flex');
+        }
+
+        function hidePlayerHistoryModal() {
+            document.getElementById('playerHistoryModal').classList.add('hidden');
+            document.getElementById('playerHistoryModal').classList.remove('flex');
+        }
+
+        // Fungsi untuk ekspor data
+        function exportData() {
+            const data = {
+                players: players,
+                history: history,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `remi-game-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Fungsi untuk impor data
+        function importData() {
+            const fileInput = document.getElementById('importFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Pilih file terlebih dahulu!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.players || !Array.isArray(data.players)) {
+                        throw new Error('Format file tidak valid');
+                    }
+                    
+                    if (confirm('Impor data akan mengganti semua data yang ada. Lanjutkan?')) {
+                        players = data.players;
+                        history = data.history || [];
+                        
+                        saveToLocalStorage();
+                        renderPlayers();
+                        renderHistory();
+                        hideImportModal();
+                    }
+                } catch (error) {
+                    alert('File tidak valid atau rusak!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Fungsi untuk menambah pemain
         function addPlayer() {
-            const nameInput = document.getElementById('playerName');
+            const nameInput = document.getElementById('playerNameInput');
             const name = nameInput.value.trim();
             
             if (name === '') {
-                alert('Mohon masukkan nama pemain!');
+                alert('Nama pemain tidak boleh kosong!');
                 return;
             }
 
-            // Check if player already exists
-            if (players.some(player => player.name.toLowerCase() === name.toLowerCase())) {
-                alert('Pemain dengan nama tersebut sudah ada!');
+            if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                alert('Nama pemain sudah ada!');
                 return;
             }
 
             const newPlayer = {
                 id: Date.now(),
                 name: name,
-                points: 0
+                score: 0
             };
 
             players.push(newPlayer);
-            nameInput.value = '';
-            saveData();
+            saveToLocalStorage();
             renderPlayers();
+            hideAddPlayerModal();
         }
 
-        // Remove player
-        function removePlayer(id) {
+        // Fungsi untuk mengedit nama pemain
+        function savePlayerEdit() {
+            const nameInput = document.getElementById('editPlayerNameInput');
+            const newName = nameInput.value.trim();
+            
+            if (newName === '') {
+                alert('Nama pemain tidak boleh kosong!');
+                return;
+            }
+
+            if (players.some(p => p.name.toLowerCase() === newName.toLowerCase() && p.id !== editingPlayerId)) {
+                alert('Nama pemain sudah ada!');
+                return;
+            }
+
+            const player = players.find(p => p.id === editingPlayerId);
+            const oldName = player.name;
+            player.name = newName;
+            
+            saveToLocalStorage();
+            renderPlayers();
+            hideEditPlayerModal();
+        }
+
+        // Fungsi untuk menghapus pemain
+        function deletePlayer(playerId) {
             if (confirm('Yakin ingin menghapus pemain ini?')) {
-                players = players.filter(player => player.id !== id);
-                saveData();
+                const player = players.find(p => p.id === playerId);
+                players = players.filter(p => p.id !== playerId);
+                saveToLocalStorage();
                 renderPlayers();
             }
         }
 
-        // Edit player name
-        function editPlayerName(id) {
-            const player = players.find(p => p.id === id);
-            const newName = prompt('Masukkan nama baru:', player.name);
-            
-            if (newName && newName.trim() !== '') {
-                // Check if new name already exists
-                if (players.some(p => p.id !== id && p.name.toLowerCase() === newName.trim().toLowerCase())) {
-                    alert('Nama tersebut sudah digunakan pemain lain!');
-                    return;
-                }
+        // Fungsi untuk memutar efek suara
+        function playSound(frequency, duration = 200) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
                 
-                player.name = newName.trim();
-                saveData();
-                renderPlayers();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration / 1000);
+            } catch (error) {
+                // Jika browser tidak mendukung Web Audio API, abaikan error
+                console.log('Audio not supported');
             }
         }
 
-        // Add points
-        function addPoints(id, amount) {
-            const player = players.find(p => p.id === id);
-            player.points += amount;
-            saveData();
+        // Fungsi untuk mengubah poin
+        function changeScore(playerId, change) {
+            const player = players.find(p => p.id === playerId);
+            player.score += change;
+            
+            // Putar efek suara
+            if (change > 0) {
+                playSound(800); // Nada tinggi untuk tambah poin
+            } else {
+                playSound(400); // Nada rendah untuk kurang poin
+            }
+            
+            const changeText = change > 0 ? `+${change}` : `${change}`;
+            const emoji = change > 0 ? '⬆️' : '⬇️';
+            addToHistory(`${emoji} ${player.name}: ${changeText} poin (Total: ${player.score})`);
+            
+            saveToLocalStorage();
             renderPlayers();
         }
 
-        // Subtract points
-        function subtractPoints(id, amount) {
-            const player = players.find(p => p.id === id);
-            player.points -= amount;
-            saveData();
-            renderPlayers();
-        }
-
-        // Add manual points
-        function addManualPoints(id) {
-            const input = document.getElementById(`addPoints${id}`);
-            const points = parseInt(input.value);
+        // Fungsi untuk menambah poin dengan input inline
+        function addPoints(playerId) {
+            const pointInput = document.getElementById(`pointInput_${playerId}`);
+            const points = parseInt(pointInput.value);
             
             if (isNaN(points) || points <= 0) {
-                alert('Mohon masukkan angka positif yang valid!');
+                alert('Masukkan jumlah poin yang valid (lebih dari 0)!');
                 return;
             }
             
-            const player = players.find(p => p.id === id);
-            player.points += points;
-            input.value = '';
-            saveData();
-            renderPlayers();
+            changeScore(playerId, points);
+            pointInput.value = '';
         }
 
-        // Subtract manual points
-        function subtractManualPoints(id) {
-            const input = document.getElementById(`subtractPoints${id}`);
-            const points = parseInt(input.value);
+        // Fungsi untuk mengurangi poin dengan input inline
+        function subtractPoints(playerId) {
+            const pointInput = document.getElementById(`pointInput_${playerId}`);
+            const points = parseInt(pointInput.value);
             
             if (isNaN(points) || points <= 0) {
-                alert('Mohon masukkan angka positif yang valid!');
+                alert('Masukkan jumlah poin yang valid (lebih dari 0)!');
                 return;
             }
             
-            const player = players.find(p => p.id === id);
-            player.points -= points;
-            input.value = '';
-            saveData();
-            renderPlayers();
+            changeScore(playerId, -points);
+            pointInput.value = '';
         }
 
-        // Reset game
+        // Fungsi untuk menambah ke riwayat
+        function addToHistory(text) {
+            const now = new Date();
+            const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            history.unshift({ text, time });
+            renderHistory();
+        }
+
+        // Fungsi untuk reset permainan
         function resetGame() {
-            if (confirm('Yakin ingin mereset semua data permainan?')) {
-                players = [];
-                localStorage.removeItem('remiPlayers');
-                renderPlayers();
-            }
+            players.forEach(player => player.score = 0);
+            history = [];
+            saveToLocalStorage();
+            renderPlayers();
+            renderHistory();
+            hideResetModal();
         }
 
-        // Render all players
+        // Fungsi untuk render pemain
         function renderPlayers() {
-            const container = document.getElementById('playersContainer');
+            const playersList = document.getElementById('playersList');
+            const emptyState = document.getElementById('emptyState');
             
             if (players.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <div class="text-6xl mb-4">🎮</div>
-                        <h3 class="text-xl font-medium text-gray-600 mb-2">Belum ada pemain</h3>
-                        <p class="text-gray-500">Tambahkan pemain untuk memulai permainan</p>
+                playersList.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            
+            // Urutkan pemain berdasarkan skor tertinggi
+            const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+            
+            playersList.innerHTML = sortedPlayers.map((player, index) => {
+                const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤';
+                return `
+                    <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30 fade-in">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl sm:text-2xl">${rankEmoji}</span>
+                                <div>
+                                    <h3 class="text-lg sm:text-xl font-semibold text-white">${player.name}</h3>
+                                    <p class="text-white/70 text-sm">Peringkat ${index + 1}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center gap-2 w-full sm:w-auto sm:justify-end">
+                                <button onclick="showPlayerHistory(${player.id})" class="text-white/70 hover:text-white transition-colors p-2 text-sm" title="Lihat Riwayat">
+                                    📊
+                                </button>
+                                <button onclick="showEditPlayerModal(${player.id})" class="text-white/70 hover:text-white transition-colors p-2 text-sm" title="Edit Nama">
+                                    ✏️
+                                </button>
+                                <button onclick="deletePlayer(${player.id})" class="text-red-400 hover:text-red-300 transition-colors p-2 text-sm" title="Hapus Pemain">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Poin di atas -->
+                        <div class="text-center bg-white/10 rounded-xl p-4 mb-4">
+                            <div class="text-5xl sm:text-6xl font-bold mb-1 ${player.score < 0 ? 'text-red-400' : 'text-white'}">${player.score}</div>
+                            <div class="text-white/70 text-sm sm:text-base font-medium">POIN</div>
+                        </div>
+                        
+                        <!-- Kontrol tambah/kurang di bawah -->
+                        <div class="flex items-center gap-2 justify-center">
+                            <button onclick="subtractPoints(${player.id})" class="bg-red-500 hover:bg-red-600 text-white py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 max-w-[100px]">
+                                - Kurang
+                            </button>
+                            <input type="number" id="pointInput_${player.id}" placeholder="0" min="1" class="w-20 px-3 py-2 border border-white/30 rounded-lg bg-white/20 text-white text-center placeholder-white/50 focus:ring-2 focus:ring-white/50 focus:border-transparent outline-none text-sm">
+                            <button onclick="addPoints(${player.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white py-2 text-sm rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex-1 max-w-[100px]">
+                                + Tambah
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fungsi untuk render riwayat
+        function renderHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="text-center py-8 text-white/60">
+                        <div class="text-4xl mb-2">📝</div>
+                        <p>Belum ada riwayat</p>
                     </div>
                 `;
                 return;
             }
 
-            // Sort players by points (highest first)
-            const sortedPlayers = [...players].sort((a, b) => b.points - a.points);
-
-            container.innerHTML = sortedPlayers.map((player, index) => `
-                <div class="player-card card-shadow bg-white rounded-2xl p-6 fade-in">
-                    <!-- Player Header -->
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                ${index === 0 ? '<span class="text-2xl">👑</span>' : '<span class="text-2xl">🎯</span>'}
-                                <h3 class="text-xl font-semibold text-gray-800 truncate">${player.name}</h3>
-                            </div>
-                            ${index === 0 ? '<span class="text-sm text-yellow-600 font-medium">Pemimpin</span>' : ''}
-                        </div>
-                        <div class="flex gap-2">
-                            <button 
-                                onclick="editPlayerName(${player.id})" 
-                                class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                                title="Edit nama"
-                            >
-                                ✏️
-                            </button>
-                            <button 
-                                onclick="removePlayer(${player.id})" 
-                                class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                                title="Hapus pemain"
-                            >
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Points Display -->
-                    <div class="text-center mb-6">
-                        <div class="text-4xl font-bold ${player.points >= 0 ? 'text-green-600' : 'text-red-600'} mb-2">
-                            ${player.points >= 0 ? '+' : ''}${player.points}
-                        </div>
-                        <div class="text-sm text-gray-500">Point</div>
-                    </div>
-
-                    <!-- Point Controls -->
-                    <div class="space-y-3">
-                        <!-- Manual Add Points -->
-                        <div class="flex gap-2">
-                            <input 
-                                type="number" 
-                                id="addPoints${player.id}" 
-                                placeholder="Tambah point"
-                                class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none text-center"
-                                onkeypress="if(event.key==='Enter') addManualPoints(${player.id})"
-                            >
-                            <button onclick="addManualPoints(${player.id})" class="point-btn bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg font-medium">
-                                ➕
-                            </button>
-                        </div>
-                        
-                        <!-- Manual Subtract Points -->
-                        <div class="flex gap-2">
-                            <input 
-                                type="number" 
-                                id="subtractPoints${player.id}" 
-                                placeholder="Kurang point"
-                                class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none text-center"
-                                onkeypress="if(event.key==='Enter') subtractManualPoints(${player.id})"
-                            >
-                            <button onclick="subtractManualPoints(${player.id})" class="point-btn bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-medium">
-                                ➖
-                            </button>
-                        </div>
-                    </div>
+            historyList.innerHTML = history.map(item => `
+                <div class="bg-white/10 rounded-lg p-3 border border-white/20 fade-in">
+                    <div class="text-white/90 text-sm">${item.text}</div>
+                    <div class="text-white/50 text-xs mt-1">${item.time}</div>
                 </div>
             `).join('');
         }
+
+        // Event listener untuk Enter key
+        document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+
+        document.getElementById('editPlayerNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                savePlayerEdit();
+            }
+        });
+
+
+
+        // Tutup modal saat klik di luar
+        document.getElementById('addPlayerModal').addEventListener('click', function(e) {
+            if (e.target === this) hideAddPlayerModal();
+        });
+
+        document.getElementById('resetModal').addEventListener('click', function(e) {
+            if (e.target === this) hideResetModal();
+        });
+
+        document.getElementById('editPlayerModal').addEventListener('click', function(e) {
+            if (e.target === this) hideEditPlayerModal();
+        });
+
+
+
+        document.getElementById('importModal').addEventListener('click', function(e) {
+            if (e.target === this) hideImportModal();
+        });
+
+        document.getElementById('playerHistoryModal').addEventListener('click', function(e) {
+            if (e.target === this) hidePlayerHistoryModal();
+        });
+
+        // Inisialisasi - muat data dari localStorage
+        loadFromLocalStorage();
+        renderPlayers();
+        renderHistory();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96bf48931684409a',t:'MTc1NDY1ODkzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97448017b461fd90',t:'MTc1NjA1NTgxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
